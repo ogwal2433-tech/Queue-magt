@@ -793,7 +793,12 @@ def reset_teller_pin(teller_id):
 # RUN THE APPLICATION
 # ============================================
 
+
+# At the bottom of app.py
 if __name__ == '__main__':
+    # Railway provides the PORT, fallback to 8080 for local testing
+    PORT = int(os.environ.get('PORT', 8080))
+    
     print("=" * 50)
     print("🚀 Queue Management System API (Flask)")
     print("=" * 50)
@@ -818,7 +823,8 @@ if __name__ == '__main__':
     print(f"   GET  /api/queue/recent-recalls")
     print("=" * 50)
     print()
-    print("🌐 Access the system at: http://localhost:" + str(PORT))
+    print(f"🌐 Access the system at: http://localhost:{PORT}")
     print("=" * 50)
     
+    # debug=False for production
     app.run(host='0.0.0.0', port=PORT, debug=False)
