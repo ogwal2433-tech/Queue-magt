@@ -34,24 +34,51 @@ DB_CONFIG = {
     'host': 'localhost',
     'port': 3306,
     'user': 'root',
-    'password': '',
-    'database': 'queue_management_system',
-    'pool_name': 'queue_pool',
-    'pool_size': 10
+    'password': '',  # Your password
+    'database': 'queue_management_system'
 }
 
-try:
-    connection_pool = pooling.MySQLConnectionPool(**DB_CONFIG)
-    print("✅ Database connected successfully")
-except Exception as e:
-    print(f"❌ Database connection error: {e}")
-    connection_pool = None
-
 def get_db_connection():
-    if connection_pool:
-        return connection_pool.get_connection()
-    else:
-        return mysql.connector.connect(**DB_CONFIG)
+    """Create a FRESH database connection each time"""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        return conn
+    except Exception as e:
+        print(f"❌ Database connection error: {e}")
+        raise e
+
+def execute_query(query, params=None, fetch_one=False, fetch_all=False, commit=False):
+    """Execute SQL query with fresh connection"""
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()  # Fresh connection every time
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute(query, params or ())
+        
+        if fetch_one:
+            result = cursor.fetchone()
+        elif fetch_all:
+            result = cursor.fetchall()
+        else:
+            result = None
+        
+        if commit:
+            conn.commit()
+            result = cursor.lastrowid
+        
+        return result
+    except Exception as e:
+        if conn and commit:
+            conn.rollback()
+        print(f"❌ Query error: {e}")
+        raise e
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()  
 
 # ============================================
 # HEALTH CHECK
@@ -59,14 +86,16 @@ def get_db_connection():
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    """Check if API and database are running"""
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT 1 as test")
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
         cursor.close()
         conn.close()
         db_status = "connected"
     except Exception as e:
+        print(f"Health check DB error: {e}")
         db_status = "disconnected"
     
     return jsonify({
