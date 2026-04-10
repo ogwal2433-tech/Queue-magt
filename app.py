@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
-from mysql.connector import pooling
 from datetime import datetime
 import logging
 import os
+import re
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -13,6 +13,50 @@ logger = logging.getLogger(__name__)
 # Create Flask app
 app = Flask(__name__)
 CORS(app)
+
+# ============================================
+# RAILWAY / PRODUCTION CONFIGURATION
+# ============================================
+
+# Get port from environment (Railway sets this)
+PORT = int(os.environ.get('PORT', 5000))
+
+# Database configuration - Priority: Railway MySQL URL > Local settings
+DATABASE_URL = os.environ.get('MYSQL_URL', os.environ.get('DATABASE_URL', ''))
+
+if DATABASE_URL:
+    # Parse Railway MySQL URL
+    # Format: mysql://user:password@host:port/database
+    match = re.match(r'mysql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
+    if match:
+        DB_CONFIG = {
+            'host': match.group(3),
+            'port': int(match.group(4)),
+            'user': match.group(1),
+            'password': match.group(2),
+            'database': match.group(5)
+        }
+        print(f"✅ Using Railway MySQL: {match.group(3)}:{match.group(4)}/{match.group(5)}")
+    else:
+        # Fallback for other URL formats
+        DB_CONFIG = {
+            'host': os.environ.get('DB_HOST', 'localhost'),
+            'port': int(os.environ.get('DB_PORT', 3306)),
+            'user': os.environ.get('DB_USER', 'root'),
+            'password': os.environ.get('DB_PASSWORD', ''),
+            'database': os.environ.get('DB_NAME', 'queue_management_system')
+        }
+        print("✅ Using environment variable database config")
+else:
+    # Local development
+    DB_CONFIG = {
+        'host': 'localhost',
+        'port': 3306,
+        'user': 'root',
+        'password': '',
+        'database': 'queue_management_system'
+    }
+    print("✅ Using local database config")
 
 # ============================================
 # SERVE HTML PAGES
@@ -27,16 +71,8 @@ def serve_static(filename):
     return send_from_directory('.', filename)
 
 # ============================================
-# DATABASE CONFIGURATION
+# DATABASE FUNCTIONS
 # ============================================
-
-DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'user': 'root',
-    'password': '',  # Your password
-    'database': 'queue_management_system'
-}
 
 def get_db_connection():
     """Create a FRESH database connection each time"""
@@ -52,7 +88,7 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False, commit=F
     conn = None
     cursor = None
     try:
-        conn = get_db_connection()  # Fresh connection every time
+        conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute(query, params or ())
@@ -78,7 +114,7 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False, commit=F
         if cursor:
             cursor.close()
         if conn:
-            conn.close()  
+            conn.close()
 
 # ============================================
 # HEALTH CHECK
@@ -587,7 +623,7 @@ def skip_customer():
         conn.close()
 
 # ============================================
-# TELLER: RECALL CUSTOMER (Triggers Voice on Public Display)
+# TELLER: RECALL CUSTOMER
 # ============================================
 
 @app.route('/api/tellers/recall', methods=['POST'])
@@ -604,7 +640,6 @@ def recall_customer():
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # Get current token status and teller info
         cursor.execute("""
             SELECT q.status, q.token_number, t.teller_number
             FROM queue_tokens q
@@ -617,7 +652,6 @@ def recall_customer():
         if not token:
             return jsonify({'success': False, 'message': 'Token not found'}), 404
         
-        # Log recall event for Public Display to detect
         cursor.execute("""
             INSERT INTO queue_logs (token_number, teller_id, action, action_details, created_at)
             VALUES (%s, %s, 'recall', 'Recall announcement requested', NOW())
@@ -641,12 +675,11 @@ def recall_customer():
         conn.close()
 
 # ============================================
-# GET RECENT RECALLS (for Public Display Voice)
+# GET RECENT RECALLS
 # ============================================
 
 @app.route('/api/queue/recent-recalls', methods=['GET'])
 def get_recent_recalls():
-    """Get recent recall events for voice announcements"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -764,7 +797,7 @@ if __name__ == '__main__':
     print("=" * 50)
     print("🚀 Queue Management System API (Flask)")
     print("=" * 50)
-    print(f"📍 API URL: http://localhost:5000")
+    print(f"📍 API URL: http://localhost:{PORT}")
     print(f"📖 Endpoints:")
     print(f"   GET  /api/health")
     print(f"   POST /api/tokens")
@@ -785,7 +818,7 @@ if __name__ == '__main__':
     print(f"   GET  /api/queue/recent-recalls")
     print("=" * 50)
     print()
-    print("🌐 Access the system at: http://localhost:5000")
+    print("🌐 Access the system at: http://localhost:" + str(PORT))
     print("=" * 50)
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=False)
