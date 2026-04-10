@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teller Management - Queue System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 28px;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Two Column Layout */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,200,83,0.3);
+        }
+
+        /* Tellers Table */
+        .tellers-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            width: 250px;
+        }
+
+        .tellers-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tellers-table th,
+        .tellers-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tellers-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .tellers-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-available {
+            background: #00c853;
+            color: white;
+        }
+
+        .status-busy {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-offline {
+            background: #f44336;
+            color: white;
+        }
+
+        .status-break {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-reset {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-confirm {
+            flex: 1;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .modal-cancel {
+            flex: 1;
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            z-index: 1100;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { background: #00c853; }
+        .toast.error { background: #f44336; }
+        .toast.info { background: #3498db; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+            .table-header {
+                flex-direction: column;
+            }
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            🏦 Queue <span>Manager</span>
+        </div>
+        <div class="nav-links">
+            <a href="teller-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="teller-management.html" class="nav-link" style="background: rgba(255,255,255,0.2);">Teller Management</a>
+            <a href="customer-token.html" class="nav-link">Get Token</a>
+            <a href="public-display.html" class="nav-link">Public Display</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-title">
+            👨‍💼 Teller Management
+            <span style="font-size: 14px; color: #666;">Add, edit, and manage tellers</span>
+        </div>
+
+        <div class="two-columns">
+            <!-- Left: Add/Edit Teller Form -->
+            <div class="form-card">
+                <div class="form-title" id="formTitle">➕ Add New Teller</div>
+                
+                <form id="tellerForm">
+                    <input type="hidden" id="tellerId" value="">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Teller Number *</label>
+                        <input type="number" class="form-input" id="tellerNumber" placeholder="e.g., 1, 2, 3" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-input" id="tellerName" placeholder="e.g., John Mwangi" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" id="tellerEmail" placeholder="john@bank.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" id="tellerPhone" placeholder="e.g., 0712345678">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Service Category *</label>
+                        <select class="form-select" id="serviceCategory" required>
+                            <option value="">Select Service</option>
+                            <option value="W">💰 Withdrawal (W)</option>
+                            <option value="L">🤝 Loan Application (L)</option>
+                            <option value="D">🐷 Deposit (D)</option>
+                            <option value="C">👤 Account Opening (C)</option>
+                            <option value="T">📄 Cheque Processing (T)</option>
+                            <option value="E">❓ Enquiries (E)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">PIN Code (for login)</label>
+                        <input type="password" class="form-input" id="pinCode" placeholder="4-digit PIN">
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">➕ Add Teller</button>
+                    <button type="button" class="btn-submit" id="cancelBtn" style="background: #999; display: none;" onclick="cancelEdit()">Cancel Edit</button>
+                </form>
+            </div>
+
+            <!-- Right: Tellers List -->
+            <div class="tellers-card">
+                <div class="table-header">
+                    <strong>📋 Registered Tellers</strong>
+                    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by name or number...">
+                </div>
+                
+                <div id="tellersContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading tellers...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Confirm Delete</div>
+            <p id="deleteMessage">Are you sure you want to delete this teller?</p>
+            <div class="modal-buttons">
+                <button class="modal-confirm" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset PIN Modal -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content">
+            <div class="modal-title">🔐 Reset PIN</div>
+            <p>Enter new PIN for <strong id="resetTellerName"></strong></p>
+            <input type="password" id="newPin" class="form-input" style="margin: 15px 0;" placeholder="Enter 4-digit PIN">
+            <div class="modal-buttons">
+                <button class="modal-confirm" onclick="confirmResetPin()" style="background: #ff9800;">Reset PIN</button>
+                <button class="modal-cancel" onclick="closeResetModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE_URL = "http://127.0.0.1:5000";
+        
+        let tellersList = [];
+        let deleteId = null;
+        let resetId = null;
+        
+        // ============================================
+        // API CALLS
+        // ============================================
+        
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast(error.message, 'error');
+                return { success: false, message: error.message };
+            }
+        }
+        
+        // ============================================
+        // LOAD TELLERS
+        // ============================================
+        async function loadTellers() {
+            const container = document.getElementById('tellersContainer');
+            
+            try {
+                const result = await apiCall('/api/tellers');
+                
+                if (result.success && result.tellers) {
+                    tellersList = result.tellers;
+                    renderTellersTable(tellersList);
+                } else {
+                    container.innerHTML = '<div class="loading">❌ Failed to load tellers</div>';
+                }
+            } catch (error) {
+                console.error('Error loading tellers:', error);
+                container.innerHTML = '<div class="loading">❌ Error loading tellers. Make sure server is running.</div>';
+            }
+        }
+        
+        // ============================================
+        // RENDER TELLERS TABLE
+        // ============================================
+        function renderTellersTable(tellers) {
+            const container = document.getElementById('tellersContainer');
+            
+            if (tellers.length === 0) {
+                container.innerHTML = `
+                    <div class="loading">
+                        📭 No tellers registered yet
+                        <br>
+                        <small>Use the form to add your first teller</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            const serviceNames = {
+                'W': 'Withdrawal', 'L': 'Loan', 'D': 'Deposit', 
+                'C': 'Account', 'T': 'Cheque', 'E': 'Enquiry'
+            };
+            
+            const statusColors = {
+                'available': 'status-available',
+                'busy': 'status-busy',
+                'called': 'status-busy',
+                'offline': 'status-offline',
+                'break': 'status-break'
+            };
+            
+            const statusLabels = {
+                'available': 'Available',
+                'busy': 'Busy',
+                'called': 'Called',
+                'offline': 'Offline',
+                'break': 'Break'
+            };
+            
+            container.innerHTML = `
+                <table class="tellers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Teller #</th>
+                            <th>Name</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Current Token</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tellers.map(teller => `
+                            <tr>
+                                <td>${teller.id}</td>
+                                <td><strong>${teller.teller_number}</strong></td>
+                                <td>${teller.teller_name}</td>
+                                <td>${serviceNames[teller.serving_category] || teller.serving_category}</td>
+                                <td><span class="status-badge ${statusColors[teller.status] || 'status-offline'}">${statusLabels[teller.status] || teller.status}</span></td>
+                                <td>${teller.current_token || '—'}</td>
+                                <td class="action-buttons">
+                                    <button class="btn-edit" onclick="editTeller(${teller.id})">✏️ Edit</button>
+                                    <button class="btn-reset" onclick="showResetModal(${teller.id}, '${teller.teller_name}')">🔐 Reset PIN</button>
+                                    <button class="btn-delete" onclick="showDeleteModal(${teller.id}, '${teller.teller_name}')">🗑️ Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // ============================================
+        // SEARCH FUNCTION
+        // ============================================
+        function searchTellers() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = tellersList.filter(teller => 
+                teller.teller_name.toLowerCase().includes(searchTerm) ||
+                teller.teller_number.toString().includes(searchTerm) ||
+                (teller.serving_category && teller.serving_category.toLowerCase().includes(searchTerm))
+            );
+            renderTellersTable(filtered);
+        }
+        
+        // ============================================
+        // ADD/EDIT TELLER
+        // ============================================
+        document.getElementById('tellerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const tellerId = document.getElementById('tellerId').value;
+            const tellerNumber = document.getElementById('tellerNumber').value;
+            const tellerName = document.getElementById('tellerName').value;
+            const tellerEmail = document.getElementById('tellerEmail').value;
+            const tellerPhone = document.getElementById('tellerPhone').value;
+            const serviceCategory = document.getElementById('serviceCategory').value;
+            const pinCode = document.getElementById('pinCode').value;
+            
+            if (!tellerNumber || !tellerName || !serviceCategory) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                let result;
+                
+                if (tellerId) {
+                    // Update existing teller
+                    result = await apiCall(`/api/tellers/${tellerId}`, 'PUT', {
+                        teller_number: parseInt(tellerNumber),
+                        teller_name: tellerName,
+                        email: tellerEmail,
+                        phone: tellerPhone,
+                        serving_category: serviceCategory,
+                        pin_code: pinCode || null
+                    });
+                } else {
+                    // Add new teller
+                    result = await apiCall('/api/tellers', 'POST', {
+                        teller_number: parseInt(tellerNumber),
+                        teller_name: tellerName,
+                        email: tellerEmail,
+                        phone: tellerPhone,
+                        serving_category: serviceCategory,
+                        pin_code: pinCode || '1234',
+                        status: 'available'
+                    });
+                }
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    resetForm();
+                    loadTellers();
+                } else {
+                    showToast(result.message || 'Failed to save teller', 'error');
+                }
+            } catch (error) {
+                showToast('Error saving teller', 'error');
+            } finally {
+                submitBtn.textContent = tellerId ? '💾 Update Teller' : '➕ Add Teller';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // ============================================
+        // EDIT TELLER
+        // ============================================
+        function editTeller(id) {
+            const teller = tellersList.find(t => t.id === id);
+            if (!teller) return;
+            
+            document.getElementById('formTitle').innerHTML = '✏️ Edit Teller';
+            document.getElementById('tellerId').value = teller.id;
+            document.getElementById('tellerNumber').value = teller.teller_number;
+            document.getElementById('tellerName').value = teller.teller_name;
+            document.getElementById('tellerEmail').value = teller.email || '';
+            document.getElementById('tellerPhone').value = teller.phone || '';
+            document.getElementById('serviceCategory').value = teller.serving_category || '';
+            document.getElementById('pinCode').value = '';
+            document.getElementById('pinCode').placeholder = 'Leave blank to keep current PIN';
+            
+            document.getElementById('submitBtn').innerHTML = '💾 Update Teller';
+            document.getElementById('cancelBtn').style.display = 'block';
+            
+            // Scroll to form
+            document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function cancelEdit() {
+            resetForm();
+        }
+        
+        function resetForm() {
+            document.getElementById('formTitle').innerHTML = '➕ Add New Teller';
+            document.getElementById('tellerId').value = '';
+            document.getElementById('tellerNumber').value = '';
+            document.getElementById('tellerName').value = '';
+            document.getElementById('tellerEmail').value = '';
+            document.getElementById('tellerPhone').value = '';
+            document.getElementById('serviceCategory').value = '';
+            document.getElementById('pinCode').value = '';
+            document.getElementById('pinCode').placeholder = '4-digit PIN';
+            
+            document.getElementById('submitBtn').innerHTML = '➕ Add Teller';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+        
+        // ============================================
+        // DELETE TELLER
+        // ============================================
+        function showDeleteModal(id, name) {
+            deleteId = id;
+            document.getElementById('deleteMessage').innerHTML = `Are you sure you want to delete <strong>${name}</strong>?`;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        
+        async function confirmDelete() {
+            if (!deleteId) return;
+            
+            const result = await apiCall(`/api/tellers/${deleteId}`, 'DELETE');
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                loadTellers();
+            } else {
+                showToast(result.message || 'Failed to delete teller', 'error');
+            }
+            
+            closeDeleteModal();
+        }
+        
+        function closeDeleteModal() {
+            deleteId = null;
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+        
+        // ============================================
+        // RESET PIN
+        // ============================================
+        function showResetModal(id, name) {
+            resetId = id;
+            document.getElementById('resetTellerName').textContent = name;
+            document.getElementById('newPin').value = '';
+            document.getElementById('resetModal').style.display = 'flex';
+        }
+        
+        async function confirmResetPin() {
+            const newPin = document.getElementById('newPin').value;
+            
+            if (!newPin || newPin.length < 4) {
+                showToast('Please enter a 4-digit PIN', 'error');
+                return;
+            }
+            
+            const result = await apiCall(`/api/tellers/${resetId}/reset-pin`, 'POST', {
+                pin_code: newPin
+            });
+            
+            if (result.success) {
+                showToast('PIN reset successfully', 'success');
+            } else {
+                showToast(result.message || 'Failed to reset PIN', 'error');
+            }
+            
+            closeResetModal();
+        }
+        
+        function closeResetModal() {
+            resetId = null;
+            document.getElementById('resetModal').style.display = 'none';
+        }
+        
+        // ============================================
+        // TOAST MESSAGE
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        document.getElementById('searchBox').addEventListener('input', searchTellers);
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('deleteModal')) {
+                closeDeleteModal();
+            }
+            if (event.target === document.getElementById('resetModal')) {
+                closeResetModal();
+            }
+        };
+        
+        loadTellers();
+    </script>
+</body>
+</html>

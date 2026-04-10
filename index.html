@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Community Bank - Queue Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo span {
+            color: #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards Section */
+        .cards-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .card-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 24px;
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .card-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .card.customer .card-btn {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+        }
+
+        .card.teller .card-btn {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: white;
+        }
+
+        .card.admin .card-btn {
+            background: linear-gradient(135deg, #2196f3, #03a9f4);
+            color: white;
+        }
+
+        .card.display .card-btn {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        /* Server Status */
+        .server-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            color: #00ff88;
+            z-index: 100;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .navbar { flex-direction: column; text-align: center; }
+            .cards-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            🏦 First Community <span>Bank</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="customer-token.html" class="nav-link">Get Token</a>
+            <a href="teller-login.html" class="nav-link">Teller Login</a>
+            <a href="public-display.html" class="nav-link">Public Display</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Welcome to First Community Bank</h1>
+        <p>Smart Queue Management System - Get your token, wait comfortably, and be served when it's your turn.</p>
+    </div>
+
+    <div class="cards-container">
+        <!-- Customer Card -->
+        <a href="customer-token.html" class="card customer">
+            <div class="card-icon">🎫</div>
+            <h3>Get Queue Token</h3>
+            <p>Get your queue token for withdrawal, deposit, loan application, and other banking services.</p>
+            <div class="card-btn">Get Token →</div>
+        </a>
+
+        <!-- Teller Card -->
+        <a href="teller-login.html" class="card teller">
+            <div class="card-icon">👨‍💼</div>
+            <h3>Teller Login</h3>
+            <p>Login to serve customers, call next in queue, and manage your service counter.</p>
+            <div class="card-btn">Login →</div>
+        </a>
+
+        <!-- Admin Card -->
+        <a href="teller-management.html" class="card admin">
+            <div class="card-icon">⚙️</div>
+            <h3>Admin Panel</h3>
+            <p>Manage tellers, view analytics, configure services, and monitor system performance.</p>
+            <div class="card-btn">Manage →</div>
+        </a>
+
+        <!-- Public Display Card -->
+        <a href="public-display.html" class="card display">
+            <div class="card-icon">📺</div>
+            <h3>Public Display</h3>
+            <p>View current queue status, now serving customers, and waiting list on TV screen.</p>
+            <div class="card-btn">View Display →</div>
+        </a>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 First Community Bank | Queue Management System</p>
+        <p>📍 Main Branch | 🕐 Mon-Fri 8:00 AM - 5:00 PM | Sat 9:00 AM - 1:00 PM</p>
+    </div>
+
+    <div class="server-status" id="serverStatus">
+        🔌 Checking server...
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:5000";
+
+        async function checkServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'ok') {
+                    statusDiv.innerHTML = '🟢 Server Online';
+                    statusDiv.style.color = '#00ff88';
+                } else {
+                    statusDiv.innerHTML = '🔴 Server Offline';
+                    statusDiv.style.color = '#ff4444';
+                }
+            } catch (error) {
+                console.error('Server check error:', error);
+                statusDiv.innerHTML = '🔴 Server Offline - Start Flask';
+                statusDiv.style.color = '#ff4444';
+            }
+        }
+
+        checkServer();
+        setInterval(checkServer, 30000);
+    </script>
+</body>
+</html>
